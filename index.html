@@ -1,42 +1,223 @@
 <!doctype html>
 <html lang="zh">
-  <head>
-    <meta charset="utf-8" />
-    <title>花开富贵</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: system-ui, -apple-system, "Segoe UI", Arial;
-        background: #f5f7fb;
-        padding: 40px;
-      }
-      .card {
-        max-width: 700px;
-        background: white;
-        padding: 30px;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      }
-      button {
-        margin-top: 20px;
-        padding: 12px 16px;
-        border: none;
-        border-radius: 8px;
-        background: #4f46e5;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>花开富贵的网页</title>
+  <style>
+    body{
+      font-family: system-ui, -apple-system, "Segoe UI", Arial;
+      background:#f5f7fb;
+      padding:40px;
+    }
+    .wrap{max-width:980px;margin:0 auto;}
+    .card{
+      background:#fff;
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      padding:22px;
+    }
+    h1{margin:0 0 8px 0;font-size:28px;}
+    p{margin:0 0 16px 0;color:#555;line-height:1.6;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    textarea{
+      width:100%;
+      min-height:240px;
+      resize:vertical;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #d7dbe7;
+      outline:none;
+      font-size:14px;
+      line-height:1.6;
+    }
+    textarea:focus{border-color:#4f46e5;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0 0;}
+    button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      background:#4f46e5;
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button.secondary{background:#111827;}
+    button.ghost{
+      background:#eef2ff;
+      color:#4f46e5;
+      border:1px solid #c7d2fe;
+    }
+    button:disabled{opacity:.6;cursor:not-allowed;}
+    .label{font-weight:800;margin:6px 0;}
+    .status{margin-top:8px;color:#b91c1c;font-size:13px;}
+    .hint{font-size:12px;color:#6b7280;margin-top:8px;}
+    .out{
+      white-space:pre-wrap;
+      background:#fafafa;
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      padding:12px;
+      min-height:240px;
+      font-size:14px;
+      line-height:1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
     <div class="card">
-      <h1>花开富贵已上线</h1>
-      <p id="text">这是一个已经可以上线的网页。</p>
-      <button onclick="document.getElementById('text').innerText='你刚刚点了按钮：网站是可交互的！'">
-        点我试试
-      </button>
+      <h1>AI 工作台（先做界面）</h1>
+      <p>把领导/客户的“乱需求”直接粘贴进来，点按钮生成结构化内容。现在先用本地模拟输出，下一步接真实 AI。</p>
+
+      <div class="grid">
+        <div>
+          <div class="label">输入（原始内容）</div>
+          <textarea id="input" placeholder="例如：领导说要我把客服话术统一，顺便做个需求评估和排期……"></textarea>
+
+          <div class="row">
+            <button onclick="run('req')">需求整理</button>
+            <button onclick="run('tech')" class="secondary">技术拆解</button>
+            <button onclick="run('pm')" class="ghost">项目计划</button>
+            <button onclick="clearAll()" class="ghost">清空</button>
+          </div>
+
+          <div id="status" class="status"></div>
+          <div class="hint">提示：如果你想做成“接 AI 的真工具”，我们下一步只需要把 mockGenerate 换成 API 调用。</div>
+        </div>
+
+        <div>
+          <div class="label">输出</div>
+          <div id="output" class="out">这里会显示结果。</div>
+          <div class="row">
+            <button onclick="copyOut()" class="ghost">复制输出</button>
+          </div>
+        </div>
+      </div>
     </div>
-  </body>
+  </div>
+
+  <script>
+    function setStatus(msg){
+      document.getElementById("status").innerText = msg || "";
+    }
+
+    function setOutput(text){
+      document.getElementById("output").innerText = text || "";
+    }
+
+    function getInput(){
+      return (document.getElementById("input").value || "").trim();
+    }
+
+    function clearAll(){
+      document.getElementById("input").value = "";
+      setOutput("这里会显示结果。");
+      setStatus("");
+    }
+
+    async function run(mode){
+      setStatus("");
+      const text = getInput();
+      if(!text){
+        setStatus("请先在左边输入框粘贴内容。");
+        return;
+      }
+
+      setOutput("生成中…（本地模拟）");
+      // 模拟 0.5 秒延迟，让你有“工具”的感觉
+      await new Promise(r => setTimeout(r, 500));
+
+      const out = mockGenerate(mode, text);
+      setOutput(out);
+    }
+
+    function mockGenerate(mode, text){
+      // 这里先做“假输出”，下一步我们会替换成真实 AI 调用
+      if(mode === "req"){
+        return [
+          "【目标】",
+          "1) ……（根据你的输入推断核心目标）",
+          "",
+          "【必要功能】",
+          "- ……",
+          "",
+          "【可选功能】",
+          "- ……",
+          "",
+          "【风险点】",
+          "- 需求不清晰导致返工",
+          "- 交付标准不一致",
+          "",
+          "【不确定点（需要追问）】",
+          "- 交付物形式？（文档/页面/接口）",
+          "- 谁验收？验收标准是什么？",
+          "",
+          "【原始输入】",
+          text
+        ].join("\n");
+      }
+
+      if(mode === "tech"){
+        return [
+          "【实现步骤（建议）】",
+          "1) 明确输入/输出与验收标准",
+          "2) 拆分模块：前端/后端/数据/权限",
+          "3) 先做最小可用版本（MVP）",
+          "4) 加日志与错误处理",
+          "5) 联调与回归测试",
+          "",
+          "【依赖】",
+          "- 账号权限/接口文档/测试数据",
+          "",
+          "【风险】",
+          "- 边界条件与异常路径未覆盖",
+          "- 上线后缺少监控",
+          "",
+          "【原始输入】",
+          text
+        ].join("\n");
+      }
+
+      // pm
+      return [
+        "【任务清单】",
+        "P0（必须）",
+        "- 需求澄清（0.5 天）",
+        "- MVP 实现（1-3 天）",
+        "- 验收与修复（0.5-1 天）",
+        "",
+        "P1（可选）",
+        "- 美化/体验优化（0.5-1 天）",
+        "- 数据统计/日志（0.5 天）",
+        "",
+        "【验收标准】",
+        "- 输入/输出符合模板",
+        "- 核心流程无报错",
+        "",
+        "【风险与缓解】",
+        "- 需求变更：用版本/范围控制",
+        "- 时间不足：先保 P0",
+        "",
+        "【原始输入】",
+        text
+      ].join("\n");
+    }
+
+    async function copyOut(){
+      const out = document.getElementById("output").innerText || "";
+      try{
+        await navigator.clipboard.writeText(out);
+        setStatus("已复制到剪贴板。");
+        setTimeout(()=>setStatus(""), 1200);
+      }catch(e){
+        setStatus("复制失败：浏览器未授权剪贴板。你可以手动全选复制。");
+      }
+    }
+  </script>
+</body>
 </html>
+
+
 
